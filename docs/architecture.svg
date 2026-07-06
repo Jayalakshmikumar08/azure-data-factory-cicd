@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="380" viewBox="0 0 1180 380" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="600" viewBox="0 0 1600 600" role="img" aria-labelledby="title desc">
   <title id="title">Azure Data Factory CI/CD Architecture</title>
   <desc id="desc">A commit triggers validation, ARM export, artifact publishing, deployment to development, deployment to quality assurance and approved production release.</desc>
   <defs>
@@ -7,63 +7,63 @@
     </marker>
     <style>
       .bg { fill: #f8fafc; }
-      .title { fill: #0f172a; font: 700 24px Arial, sans-serif; }
-      .subtitle { fill: #475569; font: 400 14px Arial, sans-serif; }
-      .box { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.4; rx: 8; }
-      .box-accent { fill: #eff6ff; stroke: #2563eb; stroke-width: 1.6; rx: 8; }
-      .gate { fill: #fefce8; stroke: #ca8a04; stroke-width: 1.6; rx: 8; }
-      .label { fill: #0f172a; font: 700 15px Arial, sans-serif; }
-      .detail { fill: #475569; font: 400 12px Arial, sans-serif; }
-      .arrow { stroke: #2563eb; stroke-width: 2.2; fill: none; marker-end: url(#arrow); }
-      .lane { fill: #e2e8f0; font: 700 12px Arial, sans-serif; letter-spacing: .4px; }
+      .title { fill: #0f172a; font: 700 34px Arial, sans-serif; }
+      .subtitle { fill: #475569; font: 400 18px Arial, sans-serif; }
+      .box { fill: #ffffff; stroke: #cbd5e1; stroke-width: 2; rx: 10; }
+      .box-accent { fill: #eff6ff; stroke: #2563eb; stroke-width: 2.4; rx: 10; }
+      .gate { fill: #fefce8; stroke: #ca8a04; stroke-width: 2.4; rx: 10; }
+      .label { fill: #0f172a; font: 700 22px Arial, sans-serif; text-anchor: middle; }
+      .detail { fill: #475569; font: 400 16px Arial, sans-serif; text-anchor: middle; }
+      .arrow { stroke: #2563eb; stroke-width: 3.2; fill: none; marker-end: url(#arrow); }
+      .lane { fill: #d3dee9; font: 700 16px Arial, sans-serif; letter-spacing: .6px; text-anchor: middle; }
     </style>
   </defs>
-  <rect class="bg" x="0" y="0" width="1180" height="380" rx="18" />
-  <text class="title" x="48" y="52">Azure Data Factory CI/CD</text>
-  <text class="subtitle" x="48" y="78">A validated Data Factory artifact is promoted across environments with controlled configuration and approvals.</text>
-  <text class="lane" x="72" y="126">SOURCE</text>
-  <text class="lane" x="284" y="126">CI</text>
-  <text class="lane" x="598" y="126">RELEASE</text>
-  <text class="lane" x="940" y="126">CONTROL</text>
+  <rect class="bg" x="0" y="0" width="1600" height="600" rx="24" />
+  <text class="title" x="70" y="78">Azure Data Factory CI/CD</text>
+  <text class="subtitle" x="70" y="112">A validated Data Factory artifact is promoted across environments with controlled configuration and approvals.</text>
+  <text class="lane" x="172" y="178">SOURCE</text>
+  <text class="lane" x="540" y="178">CI</text>
+  <text class="lane" x="1018" y="178">RELEASE</text>
+  <text class="lane" x="1398" y="178">CONTROL</text>
 
-  <rect class="box" x="48" y="150" width="145" height="90" />
-  <text class="label" x="82" y="185">Commit</text>
-  <text class="label" x="82" y="205">to main</text>
-  <text class="detail" x="82" y="226">ADF changes</text>
+  <rect class="box" x="70" y="220" width="205" height="140" />
+  <text class="label" x="172" y="270">Commit</text>
+  <text class="label" x="172" y="300">to main</text>
+  <text class="detail" x="172" y="332">ADF changes</text>
 
-  <rect class="box-accent" x="235" y="150" width="145" height="90" />
-  <text class="label" x="266" y="185">Validate</text>
-  <text class="label" x="266" y="205">Factory</text>
-  <text class="detail" x="266" y="226">Build quality gate</text>
+  <rect class="box-accent" x="315" y="220" width="205" height="140" />
+  <text class="label" x="418" y="270">Validate</text>
+  <text class="label" x="418" y="300">Factory</text>
+  <text class="detail" x="418" y="332">Build quality gate</text>
 
-  <rect class="box-accent" x="422" y="150" width="145" height="90" />
-  <text class="label" x="455" y="185">Export</text>
-  <text class="label" x="455" y="205">ARM</text>
-  <text class="detail" x="455" y="226">Publish artifact</text>
+  <rect class="box-accent" x="560" y="220" width="205" height="140" />
+  <text class="label" x="662" y="270">Export</text>
+  <text class="label" x="662" y="300">ARM</text>
+  <text class="detail" x="662" y="332">Publish artifact</text>
 
-  <rect class="box" x="609" y="150" width="145" height="90" />
-  <text class="label" x="650" y="185">Deploy</text>
-  <text class="label" x="650" y="205">DEV</text>
-  <text class="detail" x="650" y="226">Parameter file</text>
+  <rect class="box" x="805" y="220" width="205" height="140" />
+  <text class="label" x="908" y="270">Deploy</text>
+  <text class="label" x="908" y="300">DEV</text>
+  <text class="detail" x="908" y="332">Parameter file</text>
 
-  <rect class="box" x="796" y="150" width="145" height="90" />
-  <text class="label" x="837" y="185">Deploy</text>
-  <text class="label" x="837" y="205">QA</text>
-  <text class="detail" x="837" y="226">Same artifact</text>
+  <rect class="box" x="1050" y="220" width="205" height="140" />
+  <text class="label" x="1152" y="270">Deploy</text>
+  <text class="label" x="1152" y="300">QA</text>
+  <text class="detail" x="1152" y="332">Same artifact</text>
 
-  <rect class="gate" x="983" y="150" width="145" height="90" />
-  <text class="label" x="1017" y="185">Approve</text>
-  <text class="label" x="1017" y="205">PROD</text>
-  <text class="detail" x="1017" y="226">Environment gate</text>
+  <rect class="gate" x="1295" y="220" width="205" height="140" />
+  <text class="label" x="1398" y="270">Approve</text>
+  <text class="label" x="1398" y="300">PROD</text>
+  <text class="detail" x="1398" y="332">Environment gate</text>
 
-  <rect class="box-accent" x="796" y="284" width="332" height="48" />
-  <text class="detail" x="820" y="306">Deployment template stops triggers, applies ARM changes,</text>
-  <text class="detail" x="820" y="323">then restarts triggers after release completion.</text>
+  <rect class="box-accent" x="850" y="438" width="650" height="76" />
+  <text class="detail" x="1175" y="468">Deployment template stops triggers, applies ARM changes,</text>
+  <text class="detail" x="1175" y="492">then restarts triggers after release completion.</text>
 
-  <path class="arrow" d="M193 195 H225" />
-  <path class="arrow" d="M380 195 H412" />
-  <path class="arrow" d="M567 195 H599" />
-  <path class="arrow" d="M754 195 H786" />
-  <path class="arrow" d="M941 195 H973" />
-  <path class="arrow" d="M1056 240 V274 H962 V284" />
+  <path class="arrow" d="M275 290 H305" />
+  <path class="arrow" d="M520 290 H550" />
+  <path class="arrow" d="M765 290 H795" />
+  <path class="arrow" d="M1010 290 H1040" />
+  <path class="arrow" d="M1255 290 H1285" />
+  <path class="arrow" d="M1398 360 V426" />
 </svg>
