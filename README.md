@@ -17,14 +17,7 @@ It focuses on the release engineering pattern rather than a specific business da
 
 ## Architecture
 
-```text
-Commit to main
-  -> Build stage validates ADF
-  -> ARM template artifact published
-  -> DEV deployment
-  -> QA deployment
-  -> PROD deployment with approval gate
-```
+![Azure Data Factory CI/CD architecture](docs/architecture.svg)
 
 ## Repository Structure
 
