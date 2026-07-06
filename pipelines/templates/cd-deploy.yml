@@ -1,0 +1,67 @@
+parameters:
+  - name: azureResourceManagerConnection
+    type: string
+  - name: dataFactory
+    type: string
+  - name: resourceGroup
+    type: string
+  - name: subscriptionId
+    type: string
+  - name: environmentName
+    type: string
+  - name: location
+    type: string
+
+steps:
+  - task: DownloadPipelineArtifact@2
+    displayName: Download ARM template artifact
+    inputs:
+      buildType: current
+      artifactName: ArmTemplate
+      targetPath: $(Pipeline.Workspace)/ArmTemplate
+
+  - task: AzurePowerShell@5
+    displayName: Stop active ADF triggers
+    inputs:
+      azureSubscription: ${{ parameters.azureResourceManagerConnection }}
+      pwsh: true
+      azurePowerShellVersion: LatestVersion
+      ScriptType: FilePath
+      ScriptPath: $(Pipeline.Workspace)/ArmTemplate/PrePostDeploymentScript.ps1
+      scriptArguments: >
+        -ArmTemplate "$(Pipeline.Workspace)/ArmTemplate/ARMTemplateForFactory.json"
+        -ArmTemplateParameters "$(Build.Repository.LocalPath)/pipelines/parameters/${{ parameters.environmentName }}.json"
+        -ResourceGroupName "${{ parameters.resourceGroup }}"
+        -DataFactoryName "${{ parameters.dataFactory }}"
+        -predeployment $true
+        -deleteDeployment $false
+
+  - task: AzureResourceManagerTemplateDeployment@3
+    displayName: Deploy ADF ARM template
+    inputs:
+      deploymentScope: Resource Group
+      azureResourceManagerConnection: ${{ parameters.azureResourceManagerConnection }}
+      subscriptionId: ${{ parameters.subscriptionId }}
+      action: Create Or Update Resource Group
+      resourceGroupName: ${{ parameters.resourceGroup }}
+      location: ${{ parameters.location }}
+      templateLocation: Linked artifact
+      csmFile: $(Pipeline.Workspace)/ArmTemplate/ARMTemplateForFactory.json
+      csmParametersFile: $(Build.Repository.LocalPath)/pipelines/parameters/${{ parameters.environmentName }}.json
+      deploymentMode: Incremental
+
+  - task: AzurePowerShell@5
+    displayName: Restart ADF triggers
+    inputs:
+      azureSubscription: ${{ parameters.azureResourceManagerConnection }}
+      pwsh: true
+      azurePowerShellVersion: LatestVersion
+      ScriptType: FilePath
+      ScriptPath: $(Pipeline.Workspace)/ArmTemplate/PrePostDeploymentScript.ps1
+      scriptArguments: >
+        -ArmTemplate "$(Pipeline.Workspace)/ArmTemplate/ARMTemplateForFactory.json"
+        -ArmTemplateParameters "$(Build.Repository.LocalPath)/pipelines/parameters/${{ parameters.environmentName }}.json"
+        -ResourceGroupName "${{ parameters.resourceGroup }}"
+        -DataFactoryName "${{ parameters.dataFactory }}"
+        -predeployment $false
+        -deleteDeployment $true

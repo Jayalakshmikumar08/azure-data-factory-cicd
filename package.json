@@ -1,0 +1,16 @@
+{
+  "name": "azure-data-factory-cicd",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Portfolio Azure DevOps pipeline for validating and deploying Azure Data Factory with ARM templates.",
+  "scripts": {
+    "adf": "node node_modules/@microsoft/azure-data-factory-utilities/lib/index",
+    "format:check": "prettier --check \"**/*.{json,yml,md}\""
+  },
+  "dependencies": {
+    "@microsoft/azure-data-factory-utilities": "^1.0.2"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3"
+  }
+}

@@ -1,0 +1,84 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+  - stage: BuildARMTemplate
+    displayName: Build ARM Template
+    variables:
+      - group: devgroup
+    jobs:
+      - job: BuildARM
+        displayName: Validate and export ADF
+        steps:
+          - template: templates/ci-build.yml
+            parameters:
+              dataFactory: $(DataFactory)
+              resourceGroup: $(ResourceGroup)
+              subscriptionId: $(SubscriptionId)
+
+  - stage: DeployToDev
+    displayName: Deploy to DEV
+    dependsOn: BuildARMTemplate
+    condition: succeeded()
+    variables:
+      - group: devgroup
+    jobs:
+      - job: DeployDev
+        displayName: Deploy DEV
+        steps:
+          - template: templates/cd-deploy.yml
+            parameters:
+              azureResourceManagerConnection: adf-azure-service-connection
+              dataFactory: $(DataFactory)
+              resourceGroup: $(ResourceGroup)
+              subscriptionId: $(SubscriptionId)
+              environmentName: dev
+              location: uksouth
+
+  - stage: DeployToQa
+    displayName: Deploy to QA
+    dependsOn: DeployToDev
+    condition: succeeded()
+    variables:
+      - group: qagroup
+    jobs:
+      - job: DeployQa
+        displayName: Deploy QA
+        steps:
+          - template: templates/cd-deploy.yml
+            parameters:
+              azureResourceManagerConnection: adf-azure-service-connection
+              dataFactory: $(DataFactory)
+              resourceGroup: $(ResourceGroup)
+              subscriptionId: $(SubscriptionId)
+              environmentName: qa
+              location: uksouth
+
+  - stage: DeployToProd
+    displayName: Deploy to PROD
+    dependsOn: DeployToQa
+    condition: succeeded()
+    variables:
+      - group: prodgroup
+    jobs:
+      - deployment: DeployProd
+        displayName: Deploy PROD with approval gate
+        environment: prod
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                - template: templates/cd-deploy.yml
+                  parameters:
+                    azureResourceManagerConnection: adf-azure-service-connection
+                    dataFactory: $(DataFactory)
+                    resourceGroup: $(ResourceGroup)
+                    subscriptionId: $(SubscriptionId)
+                    environmentName: prod
+                    location: uksouth

@@ -1,0 +1,45 @@
+parameters:
+  - name: dataFactory
+    type: string
+  - name: resourceGroup
+    type: string
+  - name: subscriptionId
+    type: string
+
+steps:
+  - task: UseNode@1
+    displayName: Install Node.js
+    inputs:
+      version: 18.x
+
+  - task: Npm@1
+    displayName: Install npm packages
+    inputs:
+      command: install
+      workingDir: $(Build.Repository.LocalPath)
+
+  - task: Npm@1
+    displayName: Validate Data Factory resources
+    inputs:
+      command: custom
+      workingDir: $(Build.Repository.LocalPath)
+      customCommand: >
+        run adf validate $(Build.Repository.LocalPath)
+        /subscriptions/${{ parameters.subscriptionId }}/resourceGroups/${{ parameters.resourceGroup }}/providers/Microsoft.DataFactory/factories/${{ parameters.dataFactory }}
+
+  - task: Npm@1
+    displayName: Export ARM template
+    inputs:
+      command: custom
+      workingDir: $(Build.Repository.LocalPath)
+      customCommand: >
+        run adf export $(Build.Repository.LocalPath)
+        /subscriptions/${{ parameters.subscriptionId }}/resourceGroups/${{ parameters.resourceGroup }}/providers/Microsoft.DataFactory/factories/${{ parameters.dataFactory }}
+        ArmTemplate
+
+  - task: PublishPipelineArtifact@1
+    displayName: Publish ARM template artifact
+    inputs:
+      targetPath: $(Build.Repository.LocalPath)/ArmTemplate
+      artifact: ArmTemplate
+      publishLocation: pipeline
