@@ -11,7 +11,7 @@ This repository separates platform provisioning from ADF application promotion i
 
 The completion trigger enforces infrastructure-first ordering. Both production deployment jobs use the shared `prod` Azure DevOps Environment and its approval check.
 
-![Azure Data Factory infrastructure and application deployment architecture](docs/architecture.svg)
+![Azure Data Factory infrastructure and application deployment architecture](docs/adf-deployment-architecture.svg)
 
 ## Infrastructure Layer
 
