@@ -1,0 +1,10 @@
+{
+  "name": "adf-ado-dev",
+  "properties": {
+    "globalParameters": {}
+  },
+  "location": "uksouth",
+  "identity": {
+    "type": "SystemAssigned"
+  }
+}

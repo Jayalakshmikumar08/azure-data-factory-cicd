@@ -1,0 +1,8 @@
+variables:
+  # Protected resources must be resolved while Azure DevOps compiles the pipeline.
+  - name: azureServiceConnectionNonProd
+    value: ADF-ADO-Project-Nonprod
+  - name: azureServiceConnectionProd
+    value: ADF-ADO-Project-Prod
+  - name: location
+    value: uksouth

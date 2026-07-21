@@ -1,69 +1,126 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="600" viewBox="0 0 1600 600" role="img" aria-labelledby="title desc">
-  <title id="title">Azure Data Factory CI/CD Architecture</title>
-  <desc id="desc">A commit triggers validation, ARM export, artifact publishing, deployment to development, deployment to quality assurance and approved production release.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="820" viewBox="0 0 1800 820" role="img" aria-labelledby="title desc">
+  <title id="title">Separated Azure Data Factory infrastructure and application pipelines</title>
+  <desc id="desc">A merge to main starts the modular Bicep infrastructure pipeline. After it succeeds, Azure DevOps automatically starts the ADF application pipeline. Both production deployment jobs use the shared prod Azure DevOps Environment approval.</desc>
   <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+    <marker id="arrowBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
       <path d="M 0 0 L 10 5 L 0 10 z" fill="#2563eb" />
+    </marker>
+    <marker id="arrowGreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#059669" />
     </marker>
     <style>
       .bg { fill: #f8fafc; }
       .title { fill: #0f172a; font: 700 34px Arial, sans-serif; }
       .subtitle { fill: #475569; font: 400 18px Arial, sans-serif; }
+      .section-infra { fill: #ecfdf5; stroke: #a7f3d0; stroke-width: 2; rx: 16; }
+      .section-app { fill: #eff6ff; stroke: #bfdbfe; stroke-width: 2; rx: 16; }
       .box { fill: #ffffff; stroke: #cbd5e1; stroke-width: 2; rx: 10; }
-      .box-accent { fill: #eff6ff; stroke: #2563eb; stroke-width: 2.4; rx: 10; }
+      .infra-box { fill: #ffffff; stroke: #059669; stroke-width: 2.4; rx: 10; }
+      .app-box { fill: #ffffff; stroke: #2563eb; stroke-width: 2.4; rx: 10; }
       .gate { fill: #fefce8; stroke: #ca8a04; stroke-width: 2.4; rx: 10; }
-      .label { fill: #0f172a; font: 700 22px Arial, sans-serif; text-anchor: middle; }
-      .detail { fill: #475569; font: 400 16px Arial, sans-serif; text-anchor: middle; }
-      .arrow { stroke: #2563eb; stroke-width: 3.2; fill: none; marker-end: url(#arrow); }
-      .lane { fill: #d3dee9; font: 700 16px Arial, sans-serif; letter-spacing: .6px; text-anchor: middle; }
+      .label { fill: #0f172a; font: 700 19px Arial, sans-serif; text-anchor: middle; }
+      .detail { fill: #475569; font: 400 14px Arial, sans-serif; text-anchor: middle; }
+      .section-label { fill: #0f172a; font: 700 22px Arial, sans-serif; }
+      .manual { fill: #047857; font: 700 14px Arial, sans-serif; letter-spacing: .5px; }
+      .arrow-infra { stroke: #059669; stroke-width: 3; fill: none; marker-end: url(#arrowGreen); }
+      .arrow-app { stroke: #2563eb; stroke-width: 3; fill: none; marker-end: url(#arrowBlue); }
+      .dependency { stroke: #64748b; stroke-width: 2.5; stroke-dasharray: 8 7; fill: none; marker-end: url(#arrowBlue); }
     </style>
   </defs>
-  <rect class="bg" x="0" y="0" width="1600" height="600" rx="24" />
-  <text class="title" x="70" y="78">Azure Data Factory CI/CD</text>
-  <text class="subtitle" x="70" y="112">A validated Data Factory artifact is promoted across environments with controlled configuration and approvals.</text>
-  <text class="lane" x="172" y="178">SOURCE</text>
-  <text class="lane" x="540" y="178">CI</text>
-  <text class="lane" x="1018" y="178">RELEASE</text>
-  <text class="lane" x="1398" y="178">CONTROL</text>
 
-  <rect class="box" x="70" y="220" width="205" height="140" />
-  <text class="label" x="172" y="270">Commit</text>
-  <text class="label" x="172" y="300">to main</text>
-  <text class="detail" x="172" y="332">ADF changes</text>
+  <rect class="bg" x="0" y="0" width="1800" height="820" rx="24" />
+  <text class="title" x="50" y="62">Azure Data Factory Enterprise Deployment</text>
+  <text class="subtitle" x="50" y="96">Infrastructure is provisioned first with Bicep; ADF application resources are promoted afterward through an independent pipeline.</text>
 
-  <rect class="box-accent" x="315" y="220" width="205" height="140" />
-  <text class="label" x="418" y="270">Validate</text>
-  <text class="label" x="418" y="300">Factory</text>
-  <text class="detail" x="418" y="332">Build quality gate</text>
+  <rect class="section-infra" x="40" y="130" width="1720" height="270" />
+  <text class="section-label" x="70" y="170">Pipeline 1 · Infrastructure</text>
+  <text class="manual" x="70" y="195">MERGE TO MAIN · devops/infrastructure-pipeline.yml</text>
 
-  <rect class="box-accent" x="560" y="220" width="205" height="140" />
-  <text class="label" x="662" y="270">Export</text>
-  <text class="label" x="662" y="300">ARM</text>
-  <text class="detail" x="662" y="332">Publish artifact</text>
+  <rect class="infra-box" x="80" y="225" width="210" height="125" />
+  <text class="label" x="185" y="268">Resource group</text>
+  <text class="label" x="185" y="294">Bicep deployment</text>
+  <text class="detail" x="185" y="322">Incremental IaC</text>
 
-  <rect class="box" x="805" y="220" width="205" height="140" />
-  <text class="label" x="908" y="270">Deploy</text>
-  <text class="label" x="908" y="300">DEV</text>
-  <text class="detail" x="908" y="332">Parameter file</text>
+  <rect class="infra-box" x="340" y="225" width="230" height="125" />
+  <text class="label" x="455" y="268">DEV → TEST</text>
+  <text class="label" x="455" y="294">→ PREPROD</text>
+  <text class="detail" x="455" y="322">Infrastructure stages</text>
 
-  <rect class="box" x="1050" y="220" width="205" height="140" />
-  <text class="label" x="1152" y="270">Deploy</text>
-  <text class="label" x="1152" y="300">QA</text>
-  <text class="detail" x="1152" y="332">Same artifact</text>
+  <rect class="infra-box" x="620" y="205" width="500" height="165" />
+  <text class="label" x="870" y="242">Platform modules per environment</text>
+  <text class="detail" x="760" y="276">Resource group</text>
+  <text class="detail" x="980" y="276">Data Factory + identity</text>
+  <text class="detail" x="760" y="306">ADLS Gen2 + landing</text>
+  <text class="detail" x="980" y="306">OAuth storage access</text>
+  <text class="detail" x="760" y="336">RBAC team handoff</text>
+  <text class="detail" x="980" y="336">Variable-group values</text>
 
-  <rect class="gate" x="1295" y="220" width="205" height="140" />
-  <text class="label" x="1398" y="270">Approve</text>
-  <text class="label" x="1398" y="300">PROD</text>
-  <text class="detail" x="1398" y="332">Environment gate</text>
+  <rect class="gate" x="1170" y="225" width="180" height="125" />
+  <text class="label" x="1260" y="268">Approve</text>
+  <text class="label" x="1260" y="294">PROD</text>
+  <text class="detail" x="1260" y="322">prod environment</text>
 
-  <rect class="box-accent" x="850" y="438" width="650" height="76" />
-  <text class="detail" x="1175" y="468">Deployment template stops triggers, applies ARM changes,</text>
-  <text class="detail" x="1175" y="492">then restarts triggers after release completion.</text>
+  <rect class="infra-box" x="1400" y="225" width="280" height="125" />
+  <text class="label" x="1540" y="268">Deploy PROD</text>
+  <text class="detail" x="1540" y="300">Infrastructure ready</text>
+  <text class="detail" x="1540" y="324">All four stages successful</text>
 
-  <path class="arrow" d="M275 290 H305" />
-  <path class="arrow" d="M520 290 H550" />
-  <path class="arrow" d="M765 290 H795" />
-  <path class="arrow" d="M1010 290 H1040" />
-  <path class="arrow" d="M1255 290 H1285" />
-  <path class="arrow" d="M1398 360 V426" />
+  <path class="arrow-infra" d="M290 287 H328" />
+  <path class="arrow-infra" d="M570 287 H608" />
+  <path class="arrow-infra" d="M1120 287 H1158" />
+  <path class="arrow-infra" d="M1350 287 H1388" />
+
+  <path class="dependency" d="M1540 350 V430 H690 V472" />
+  <text class="detail" x="1110" y="422">Successful completion automatically starts Pipeline 2</text>
+
+  <rect class="section-app" x="40" y="450" width="1720" height="320" />
+  <text class="section-label" x="70" y="492">Pipeline 2 · ADF Application</text>
+  <text class="manual" x="70" y="517">PIPELINE COMPLETION · devops/application-pipeline.yml</text>
+
+  <rect class="box" x="70" y="555" width="170" height="125" />
+  <text class="label" x="155" y="598">Commit</text>
+  <text class="label" x="155" y="624">ADF JSON</text>
+  <text class="detail" x="155" y="652">Source resources</text>
+
+  <rect class="app-box" x="270" y="555" width="170" height="125" />
+  <text class="label" x="355" y="598">Validate</text>
+  <text class="label" x="355" y="624">with Node.js</text>
+  <text class="detail" x="355" y="652">ADF utility</text>
+
+  <rect class="app-box" x="470" y="555" width="170" height="125" />
+  <text class="label" x="555" y="598">Export ARM</text>
+  <text class="label" x="555" y="624">artifact</text>
+  <text class="detail" x="555" y="652">Build once</text>
+
+  <rect class="box" x="670" y="555" width="150" height="125" />
+  <text class="label" x="745" y="610">DEV</text>
+  <text class="detail" x="745" y="642">Deploy content</text>
+
+  <rect class="box" x="850" y="555" width="150" height="125" />
+  <text class="label" x="925" y="610">TEST</text>
+  <text class="detail" x="925" y="642">Same artifact</text>
+
+  <rect class="box" x="1030" y="555" width="170" height="125" />
+  <text class="label" x="1115" y="610">PREPROD</text>
+  <text class="detail" x="1115" y="642">Same artifact</text>
+
+  <rect class="gate" x="1230" y="555" width="170" height="125" />
+  <text class="label" x="1315" y="598">Approve</text>
+  <text class="label" x="1315" y="624">PROD</text>
+  <text class="detail" x="1315" y="652">prod environment</text>
+
+  <rect class="app-box" x="1430" y="555" width="250" height="125" />
+  <text class="label" x="1555" y="598">Deploy PROD</text>
+  <text class="detail" x="1555" y="628">Pipelines · datasets</text>
+  <text class="detail" x="1555" y="652">linked services · triggers</text>
+
+  <path class="arrow-app" d="M240 617 H258" />
+  <path class="arrow-app" d="M440 617 H458" />
+  <path class="arrow-app" d="M640 617 H658" />
+  <path class="arrow-app" d="M820 617 H838" />
+  <path class="arrow-app" d="M1000 617 H1018" />
+  <path class="arrow-app" d="M1200 617 H1218" />
+  <path class="arrow-app" d="M1400 617 H1418" />
+
+  <text class="detail" x="900" y="730">ADF deployments stop changed triggers, apply environment overrides, and restart triggers after successful deployment.</text>
 </svg>

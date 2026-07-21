@@ -1,0 +1,94 @@
+trigger:
+  branches:
+    include:
+      - main
+pr: none
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  - template: pipeline-variables.yml
+
+stages:
+  - stage: ProvisionDev
+    displayName: Provision DEV infrastructure
+    variables:
+      - group: devgroup
+    jobs:
+      - job: DeployDevInfrastructure
+        displayName: Deploy DEV infrastructure
+        steps:
+          - template: templates/infrastructure-deploy.yml
+            parameters:
+              azureResourceManagerConnection: ${{ variables.azureServiceConnectionNonProd }}
+              environmentName: dev
+              location: $(location)
+              resourceGroup: $(ResourceGroup)
+              subscriptionId: $(SubscriptionId)
+              dataFactory: $(DataFactory)
+              storageAccount: $(StorageAccount)
+
+  - stage: ProvisionTest
+    displayName: Provision TEST infrastructure
+    dependsOn: ProvisionDev
+    condition: succeeded()
+    variables:
+      - group: testgroup
+    jobs:
+      - job: DeployTestInfrastructure
+        displayName: Deploy TEST infrastructure
+        steps:
+          - template: templates/infrastructure-deploy.yml
+            parameters:
+              azureResourceManagerConnection: ${{ variables.azureServiceConnectionNonProd }}
+              environmentName: test
+              location: $(location)
+              resourceGroup: $(ResourceGroup)
+              subscriptionId: $(SubscriptionId)
+              dataFactory: $(DataFactory)
+              storageAccount: $(StorageAccount)
+
+  - stage: ProvisionPreProd
+    displayName: Provision PREPROD infrastructure
+    dependsOn: ProvisionTest
+    condition: succeeded()
+    variables:
+      - group: preprodgroup
+    jobs:
+      - job: DeployPreProdInfrastructure
+        displayName: Deploy PREPROD infrastructure
+        steps:
+          - template: templates/infrastructure-deploy.yml
+            parameters:
+              azureResourceManagerConnection: ${{ variables.azureServiceConnectionProd }}
+              environmentName: preprod
+              location: $(location)
+              resourceGroup: $(ResourceGroup)
+              subscriptionId: $(SubscriptionId)
+              dataFactory: $(DataFactory)
+              storageAccount: $(StorageAccount)
+
+  - stage: ProvisionProd
+    displayName: Provision PROD infrastructure
+    dependsOn: ProvisionPreProd
+    condition: succeeded()
+    variables:
+      - group: prodgroup
+    jobs:
+      - deployment: DeployProdInfrastructure
+        displayName: Deploy PROD infrastructure with approval gate
+        environment: prod
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - template: templates/infrastructure-deploy.yml
+                  parameters:
+                    azureResourceManagerConnection: ${{ variables.azureServiceConnectionProd }}
+                    environmentName: prod
+                    location: $(location)
+                    resourceGroup: $(ResourceGroup)
+                    subscriptionId: $(SubscriptionId)
+                    dataFactory: $(DataFactory)
+                    storageAccount: $(StorageAccount)

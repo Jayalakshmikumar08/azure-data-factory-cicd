@@ -2,49 +2,99 @@
 
 Portfolio project by Jayalakshmi Kumar.
 
-## Scope
-
-This repository demonstrates a professional CI/CD structure for Azure Data Factory deployments using Azure DevOps, YAML templates and ARM templates.
-
-It focuses on the release engineering pattern rather than a specific business dataset:
-
-1. Validate Data Factory resources during CI.
-2. Export Data Factory resources as ARM template artifacts.
-3. Deploy the same artifact to DEV, QA and PROD.
-4. Use environment-specific parameter files.
-5. Stop and restart ADF triggers around deployment.
-6. Use an Azure DevOps Environment approval gate before production.
-
 ## Architecture
 
-![Azure Data Factory CI/CD architecture](docs/architecture.svg)
+This repository separates platform provisioning from ADF application promotion into two independently runnable Azure DevOps YAML pipelines.
+
+1. **Infrastructure pipeline** — runs after a merge to `main` and provisions the complete DEV, TEST, PREPROD and PROD platform inside existing resource groups using resource-group-scoped, modular Bicep.
+2. **ADF application pipeline** — starts automatically only after the infrastructure pipeline succeeds, validates and exports ADF source once, then promotes the immutable ARM artifact through the four provisioned environments.
+
+The completion trigger enforces infrastructure-first ordering. Both production deployment jobs use the shared `prod` Azure DevOps Environment and its approval check.
+
+![Azure Data Factory infrastructure and application deployment architecture](docs/architecture.svg)
+
+## Infrastructure Layer
+
+The `/devops/infrastructure-pipeline.yml` pipeline is triggered by changes merged to `main` and deploys into each existing environment resource group:
+
+- Azure Data Factory with a system-assigned managed identity
+- ADLS Gen2 storage account
+- Private `landing` container
+- Documented storage RBAC handoff for the separate access-management team
+
+Infrastructure is deployed with Bicep in incremental mode. The PROD infrastructure stage uses the `prod` Azure DevOps Environment for approval checks.
+
+`/infra/main.bicep` is the resource-group-scoped orchestration template. Focused modules under `/infra/modules` own Data Factory and storage resources. The pipeline does not register providers, create resource groups or manage role assignments.
+
+## ADF Application Layer
+
+The `/devops/application-pipeline.yml` pipeline:
+
+1. Starts after the Azure DevOps pipeline named `ADF Infrastructure` completes successfully for `main`.
+2. Installs Node.js and restores the locked npm dependencies.
+3. Validates all checked-in ADF resources.
+4. Exports an ARM artifact with Microsoft's ADF publishing utility.
+5. Promotes the same artifact through DEV, TEST, PREPROD and PROD.
+6. Stops changed triggers before deployment and restarts them afterward.
+7. Uses the `prod` Azure DevOps Environment for production approval.
+
+The included sample workload copies a public CSV file from GitHub into the provisioned ADLS Gen2 `landing` container. Its daily trigger is committed in the stopped state.
 
 ## Repository Structure
 
 ```text
-pipelines/azure-pipelines.yml       Main multi-stage pipeline
-pipelines/templates/ci-build.yml    CI template for validation/export
-pipelines/templates/cd-deploy.yml   CD template for deployments
-pipelines/parameters/               Environment-specific ARM parameters
-package.json                        ADF utility package and formatting script
-docs/                               Operational notes
+adf/                                ADF Studio source root
+  factory/                          Development factory definition
+  linkedService/                    HTTP and ADLS linked services
+  dataset/                          Source and destination datasets
+  pipeline/                         Sample copy pipeline
+  trigger/                          Stopped schedule trigger
+  arm-template-parameters-definition.json
+  publish_config.json
+infra/                              Bicep infrastructure layer
+  main.bicep                        Resource-group entry point
+  modules/                          Focused resource modules
+    data-factory.bicep              Factory and managed identity
+    storage.bicep                   ADLS Gen2 and landing container
+devops/                             Both Azure DevOps pipelines
+  infrastructure-pipeline.yml
+  application-pipeline.yml
+  pipeline-variables.yml            Shared compile-time pipeline configuration
+  templates/                        Reusable build/deployment steps
+  parameters/                       Environment ARM parameters
+docs/                               Diagram and deployment runbook
+  rbac-handoff.md                   Separate-team storage access procedure
+package.json                        ADF build tooling
 ```
 
-## Best Practices Demonstrated
+Generated directories such as `node_modules/`, `downloads/` and `ArmTemplate/` are ignored and are not committed.
 
-- Reusable YAML templates for CI and CD.
-- One build artifact promoted across environments.
-- Consistent artifact naming between build and deploy stages.
-- Environment-specific parameterization instead of hard-coded values.
-- Production approval gate through Azure DevOps Environments.
-- Trigger stop/start workflow to avoid deployment conflicts.
-- No secrets committed to source control.
+## Why Node.js Is Required
 
-## Delivery Highlights
+Node.js is required only by the ADF application CI build. Microsoft distributes the automated ADF validation and publishing utility as the `@microsoft/azure-data-factory-utilities` npm package.
 
-- Replaced manual deployment steps with a repeatable Azure DevOps release flow.
-- Validates Azure Data Factory resources before producing deployable ARM template artifacts.
-- Promotes the same validated artifact through DEV, QA and PROD for better release consistency.
-- Uses environment-specific parameter files so configuration changes are separated from pipeline logic.
-- Stops and restarts ADF triggers around deployment to reduce release-time conflicts.
-- Adds a production approval gate to support controlled enterprise release management.
+The utility validates pipelines, datasets, linked services and triggers, then exports them into the ARM artifact promoted across environments. Node.js is installed temporarily on the hosted build agent and is not deployed to Azure Data Factory.
+
+Node.js is not used by the infrastructure pipeline; Azure Resource Manager compiles and deploys the Bicep files.
+
+## Deployment Order
+
+1. Configure the Azure service connections, variable groups and approval environment described in [Deployment Notes](docs/deployment-notes.md).
+2. Create the infrastructure pipeline with the exact name `ADF Infrastructure`.
+3. Create the application pipeline, then merge a change to `main`.
+4. Approve the PROD infrastructure deployment when the run reaches the `prod` Environment.
+5. Confirm the application pipeline starts after infrastructure succeeds.
+6. Approve the PROD application deployment when the run reaches `prod`.
+7. Validate the sample copy activity before enabling its trigger.
+
+## Enterprise Controls Demonstrated
+
+- Infrastructure and application lifecycle separation
+- Declarative, repeatable Bicep infrastructure
+- Managed identity authentication without storage keys
+- Least-purpose data-plane RBAC handoff with separated access-management duties
+- Immutable ADF artifact promotion
+- Environment-specific configuration without committed secrets
+- Incremental deployments
+- Trigger-safe ADF releases
+- Shared `prod` Environment approval protection for infrastructure and application deployments.
