@@ -1,0 +1,103 @@
+{
+  "name": "pl_ingest_github_csv",
+  "properties": {
+    "activities": [
+      {
+        "name": "CopyCsvToAdls",
+        "type": "Copy",
+        "dependsOn": [],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 2,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "userProperties": [],
+        "typeProperties": {
+          "source": {
+            "type": "DelimitedTextSource",
+            "storeSettings": {
+              "type": "HttpReadSettings",
+              "requestMethod": "GET"
+            },
+            "formatSettings": {
+              "type": "DelimitedTextReadSettings"
+            }
+          },
+          "sink": {
+            "type": "DelimitedTextSink",
+            "storeSettings": {
+              "type": "AzureBlobFSWriteSettings"
+            },
+            "formatSettings": {
+              "type": "DelimitedTextWriteSettings",
+              "quoteAllText": true,
+              "fileExtension": ".csv"
+            }
+          },
+          "enableStaging": false,
+          "translator": {
+            "type": "TabularTranslator",
+            "typeConversion": true,
+            "typeConversionSettings": {
+              "allowDataTruncation": true,
+              "treatBooleanAsNumber": false
+            }
+          }
+        },
+        "inputs": [
+          {
+            "referenceName": "ds_http_csv",
+            "type": "DatasetReference",
+            "parameters": {
+              "relativeUrl": {
+                "value": "@pipeline().parameters.sourceRelativeUrl",
+                "type": "Expression"
+              }
+            }
+          }
+        ],
+        "outputs": [
+          {
+            "referenceName": "ds_adls_csv",
+            "type": "DatasetReference",
+            "parameters": {
+              "fileSystem": {
+                "value": "@pipeline().parameters.sinkFileSystem",
+                "type": "Expression"
+              },
+              "folderPath": {
+                "value": "@pipeline().parameters.sinkFolderPath",
+                "type": "Expression"
+              },
+              "fileName": {
+                "value": "@pipeline().parameters.sinkFileName",
+                "type": "Expression"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "parameters": {
+      "sourceRelativeUrl": {
+        "type": "string",
+        "defaultValue": "cs109/2014_data/master/countries.csv"
+      },
+      "sinkFileSystem": {
+        "type": "string",
+        "defaultValue": "landing"
+      },
+      "sinkFolderPath": {
+        "type": "string",
+        "defaultValue": "github/countries"
+      },
+      "sinkFileName": {
+        "type": "string",
+        "defaultValue": "countries.csv"
+      }
+    },
+    "annotations": []
+  }
+}

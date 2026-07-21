@@ -1,0 +1,118 @@
+trigger: none
+pr: none
+
+# The Azure DevOps infrastructure pipeline definition must use this exact name.
+resources:
+  pipelines:
+    - pipeline: infrastructure
+      source: ADF Infrastructure
+      trigger:
+        branches:
+          include:
+            - main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  - template: pipeline-variables.yml
+
+stages:
+  - stage: BuildARMTemplate
+    displayName: Build ARM Template
+    variables:
+      - group: devgroup
+    jobs:
+      - job: BuildARM
+        displayName: Validate and export ADF
+        steps:
+          - template: templates/adf-build.yml
+            parameters:
+              dataFactory: $(DataFactory)
+              resourceGroup: $(ResourceGroup)
+              subscriptionId: $(SubscriptionId)
+
+  - stage: DeployToDev
+    displayName: Deploy to DEV
+    dependsOn: BuildARMTemplate
+    condition: succeeded()
+    variables:
+      - group: devgroup
+    jobs:
+      - job: DeployDev
+        displayName: Deploy DEV
+        steps:
+          - template: templates/adf-deploy.yml
+            parameters:
+              azureResourceManagerConnection: ${{ variables.azureServiceConnectionNonProd }}
+              dataFactory: $(DataFactory)
+              resourceGroup: $(ResourceGroup)
+              subscriptionId: $(SubscriptionId)
+              environmentName: dev
+              location: $(location)
+              storageAccount: $(StorageAccount)
+
+  - stage: DeployToTest
+    displayName: Deploy to TEST
+    dependsOn: DeployToDev
+    condition: succeeded()
+    variables:
+      - group: testgroup
+    jobs:
+      - job: DeployTest
+        displayName: Deploy TEST
+        steps:
+          - template: templates/adf-deploy.yml
+            parameters:
+              azureResourceManagerConnection: ${{ variables.azureServiceConnectionNonProd }}
+              dataFactory: $(DataFactory)
+              resourceGroup: $(ResourceGroup)
+              subscriptionId: $(SubscriptionId)
+              environmentName: test
+              location: $(location)
+              storageAccount: $(StorageAccount)
+
+  - stage: DeployToPreProd
+    displayName: Deploy to PREPROD
+    dependsOn: DeployToTest
+    condition: succeeded()
+    variables:
+      - group: preprodgroup
+    jobs:
+      - job: DeployPreProd
+        displayName: Deploy PREPROD
+        steps:
+          - template: templates/adf-deploy.yml
+            parameters:
+              azureResourceManagerConnection: ${{ variables.azureServiceConnectionProd }}
+              dataFactory: $(DataFactory)
+              resourceGroup: $(ResourceGroup)
+              subscriptionId: $(SubscriptionId)
+              environmentName: preprod
+              location: $(location)
+              storageAccount: $(StorageAccount)
+
+  - stage: DeployToProd
+    displayName: Deploy to PROD
+    dependsOn: DeployToPreProd
+    condition: succeeded()
+    variables:
+      - group: prodgroup
+    jobs:
+      - deployment: DeployProd
+        displayName: Deploy PROD with approval gate
+        environment: prod
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                - template: templates/adf-deploy.yml
+                  parameters:
+                    azureResourceManagerConnection: ${{ variables.azureServiceConnectionProd }}
+                    dataFactory: $(DataFactory)
+                    resourceGroup: $(ResourceGroup)
+                    subscriptionId: $(SubscriptionId)
+                    environmentName: prod
+                    location: $(location)
+                    storageAccount: $(StorageAccount)

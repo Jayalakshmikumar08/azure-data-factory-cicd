@@ -1,0 +1,21 @@
+{
+  "Microsoft.DataFactory/factories": {
+    "properties": {
+      "globalParameters": {
+        "*": {
+          "value": "="
+        }
+      }
+    },
+    "location": "="
+  },
+  "Microsoft.DataFactory/factories/linkedServices": {
+    "*": {
+      "properties": {
+        "typeProperties": {
+          "url": "=:-url:string"
+        }
+      }
+    }
+  }
+}
