@@ -1,3 +1,4 @@
+[![Board Status](https://dev.azure.com/bujji94s94/fce1e7c5-8656-4fa1-9ee9-afae686db1ce/89b0d1ab-7658-4f84-ac6a-ba3babbf129c/_apis/work/boardbadge/3972809d-b44d-40f2-9ecd-174e4b3edbd9)](https://dev.azure.com/bujji94s94/fce1e7c5-8656-4fa1-9ee9-afae686db1ce/_boards/board/t/89b0d1ab-7658-4f84-ac6a-ba3babbf129c/Microsoft.RequirementCategory)
 # Azure Data Factory CI/CD
 
 Portfolio project by Jayalakshmi Kumar.
